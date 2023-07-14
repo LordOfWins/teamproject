@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:teamproject/teammembers.dart';
 
-
 /*중요 파일*/
 class TeamMemberDetailPage extends StatelessWidget {
   final TeamMember member;
@@ -12,11 +11,14 @@ class TeamMemberDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('팀원 소개 상세'),
-        titleTextStyle: TextStyle(
-            color: Color(0xFF000000),
-            fontSize: 30,
-            fontWeight: FontWeight.bold),
+        title: Text(
+          '팀원 소개 상세',
+          style: TextStyle(
+              color: Color(0xFF000000),
+              fontSize: 35,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BMJUA'),
+        ),
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Color(0xFF000000)),
       ),

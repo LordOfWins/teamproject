@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class BlogPage extends StatefulWidget {
   @override
@@ -61,45 +61,92 @@ class _BlogPageState extends State<BlogPage> {
 
   void deleteBlog(int index) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('블로그 삭제'),
-          content: Text('정말로 이 블로그를 삭제하시겠습니까?'),
-          actions: [
-            TextButton(
-              child: Text('취소'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: Text('삭제'),
-              onPressed: () {
-                setState(() {
-                  blogUrls.removeAt(index);
-                  names.removeAt(index);
-                  saveBlogs();
-                });
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0)),
+              title: Text('블로그 삭제'),
+              content: Text('정말로 이 블로그를 삭제하시겠습니까?'),
+              actions: [
+                TextButton(
+                  child: Text('취소'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                TextButton(
+                  child: Text('삭제'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('삭제 완료'),
+                            content: Text('삭제 되었습니다.'),
+                            actions: [
+                              TextButton(
+                                child: Text('닫기'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          );
+                        });
+                    setState(() {
+                      blogUrls.removeAt(index);
+                      names.removeAt(index);
+                      saveBlogs();
+                    });
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (BuildContext context) {
+                          Future.delayed(Duration(seconds: 1), () {
+                            Navigator.pop(context);
+                          });
+                          return AlertDialog(
+                              title: Text('삭제 중'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              content: SizedBox(
+                                height: 135,
+                                child: Center(
+                                    child: SizedBox(
+                                  child: new CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation(
+                                          Colors.blue),
+                                      strokeWidth: 5.0),
+                                  height: 50.0,
+                                  width: 50.0,
+                                )),
+                              ));
+                        });
+                  },
+                )
+              ]);
+        });
   }
 
   void editBlog(int index) {
     String initialUrl = blogUrls[index];
     String initialName = names[index];
-    TextEditingController urlEditController = TextEditingController(text: initialUrl);
-    TextEditingController nameEditController = TextEditingController(text: initialName);
-
+    TextEditingController urlEditController =
+        TextEditingController(text: initialUrl);
+    TextEditingController nameEditController =
+        TextEditingController(text: initialName);
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
           title: Text('블로그 수정'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -130,12 +177,54 @@ class _BlogPageState extends State<BlogPage> {
             TextButton(
               child: Text('저장'),
               onPressed: () {
+                Navigator.pop(context);
+                showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('수정 완료'),
+                        content: Text('수정 되었습니다.'),
+                        actions: [
+                          TextButton(
+                            child: Text('닫기'),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      );
+                    });
                 setState(() {
                   blogUrls[index] = initialUrl;
                   names[index] = initialName;
                   saveBlogs();
                 });
-                Navigator.pop(context);
+                showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (BuildContext context) {
+                      Future.delayed(Duration(seconds: 1), () {
+                        Navigator.pop(context);
+                      });
+                      return AlertDialog(
+                          title: Text('수정 중'),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          content: SizedBox(
+                            height: 135,
+                            child: Center(
+                                child: SizedBox(
+                              child: new CircularProgressIndicator(
+                                  valueColor:
+                                      new AlwaysStoppedAnimation(Colors.blue),
+                                  strokeWidth: 5.0),
+                              height: 50.0,
+                              width: 50.0,
+                            )),
+                          ));
+                    });
               },
             ),
           ],
@@ -148,44 +237,126 @@ class _BlogPageState extends State<BlogPage> {
     String newBlogURls = '';
     String newNames = '';
     showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0)),
+            title: Text('새로운 블로그 추가'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(labelText: 'Name'),
+                  onChanged: (value) {
+                    newNames = value;
+                    newNames = '';
+                  },
+                ),
+                TextField(
+                  controller: urlController,
+                  decoration: InputDecoration(labelText: 'URL'),
+                  onChanged: (value) {
+                    newBlogURls = "https://$value";
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('취소'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              TextButton(
+                  child: Text('추가'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    //추가되었습니다.
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (BuildContext context) {
+                          Future.delayed(Duration(seconds: 3), () {});
+                          return AlertDialog(
+                            title: Text('추가 완료'),
+                            content: Text('추가 되었습니다.'),
+                            actions: [
+                              TextButton(
+                                child: Text('닫기'),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          );
+                        });
+                    addBlog(newBlogURls, newNames);
+                    showDialog(
+                        barrierDismissible: false,
+                        context: context,
+                        builder: (BuildContext context) {
+                          Future.delayed(Duration(seconds: 1), () {
+                            Navigator.pop(context);
+                          });
+                          return AlertDialog(
+                              title: Text('추가 중'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              content: SizedBox(
+                                height: 135,
+                                child: Center(
+                                    child: SizedBox(
+                                  child: new CircularProgressIndicator(
+                                      valueColor: new AlwaysStoppedAnimation(
+                                          Colors.blue),
+                                      strokeWidth: 5.0),
+                                  height: 50.0,
+                                  width: 50.0,
+                                )),
+                              ));
+                        });
+                  })
+            ],
+          );
+        });
+  }
+
+  void copyBlog(int index) {
+    String blogUrl = blogUrls[index];
+    String name = names[index];
+
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('새로운 블로그 추가'),
+          title: Text('어떤 값을 붙여 넣으시겠습니까?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: urlController,
-                decoration: InputDecoration(labelText: 'URL'),
-                onChanged: (value) {
-                  newBlogURls = "https://$value";
+              ListTile(
+                leading: Icon(Icons.person),
+                title: Text('이름'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: name));
                 },
               ),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(labelText: 'Name'),
-                onChanged: (value) {
-                  newNames = value;
+              ListTile(
+                leading: Icon(Icons.link),
+                title: Text('블로그 주소'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Clipboard.setData(ClipboardData(text: blogUrl));
                 },
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              child: Text('취소'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-            TextButton(
-              child: Text('추가'),
-              onPressed: () {
-                addBlog(newBlogURls, newNames);
-                Navigator.pop(context);
-              },
-            ),
-          ],
         );
       },
     );
@@ -238,79 +409,172 @@ class _BlogPageState extends State<BlogPage> {
               ],
             ),
           ),
-          child: Center(
-            child: ListView.builder(
-              itemCount: blogUrls.length,
-              itemBuilder: (context, index) {
-                return Center(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    margin: EdgeInsets.symmetric(vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
+          child: ReorderableListView(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            onReorder: (int oldIndex, int newIndex) {
+              setState(() {
+                if (newIndex > oldIndex) {
+                  newIndex -= 1;
+                }
+                final String url = blogUrls.removeAt(oldIndex);
+                final String name = names.removeAt(oldIndex);
+                blogUrls.insert(newIndex, url);
+                names.insert(newIndex, name);
+                saveBlogs();
+              });
+            },
+            children: List.generate(blogUrls.length, (index) {
+              return ListTile(
+                key: Key('$index'),
+                tileColor: Colors.transparent,
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${names[index]}',
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF49009D),
+                        height: 1.4,
+                        fontFamily: 'BMJUA',
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.normal,
-                                color: Color(0xFF49009D),
-                                height: 1.4,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: "${names[index]} : ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'BMJUA',
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: blogUrls[index],
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontFamily: 'BMYEONSUNG',
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      if(blogUrls[index].contains('.')) {
-                                        launchUrl(Uri.parse(blogUrls[index]));
-                                      } else {
-                                        String quest =blogUrls[index].substring(8,blogUrls[index].length).toString();
-                                        launchUrl(Uri.parse('https://www.google.com/search?q=$quest'));
-                                      }
-                                    },
-                                ),
-                              ],
-                            ),
+                    Text(
+                      '${blogUrls[index]}',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontSize: 23,
+                        fontFamily: 'BMYEONSUNG',
+                      ),
+                    ),
+                  ],
+                ),
+                trailing: Wrap(
+                  spacing: 8,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.content_copy),
+                      onPressed: () {
+                        copyBlog(index);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.edit),
+                      onPressed: () {
+                        editBlog(index);
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        deleteBlog(index);
+                      },
+                    ),
+                  ],
+                ),
+                onTap: () {
+                  if (blogUrls[index].contains('.') ||
+                      blogUrls[index].contains('com') ||
+                      blogUrls[index].contains('www')) {
+                    launchUrl(Uri.parse(blogUrls[index]));
+                  } else {
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () {
-                            editBlog(index);
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            deleteBlog(index);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                          title: Text('오류'),
+                          content: Text('URL을 열 수 없습니다.'),
+                          actions: [
+                            TextButton(
+                              child: Text('닫기'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                showDialog(
+                                  barrierDismissible: false,
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                      ),
+                                      title: Text('오류'),
+                                      content: Text('검색 하시겠습니까?'),
+                                      actions: [
+                                        TextButton(
+                                          child: Text('예'),
+                                          onPressed: () {
+                                            String quest = blogUrls[index]
+                                                .substring(
+                                                    8, blogUrls[index].length)
+                                                .toString();
+                                            launchUrl(Uri.parse(
+                                                'https://www.google.com/search?q=$quest'));
+                                            Navigator.pop(context);
+                                            showDialog(
+                                              barrierDismissible: false,
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                Future.delayed(
+                                                    Duration(seconds: 3), () {
+                                                  Navigator.pop(context);
+                                                });
+                                                return AlertDialog(
+                                                  title: Text('검색 중'),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                  ),
+                                                  content: SizedBox(
+                                                    height: 135,
+                                                    child: Center(
+                                                      child: SizedBox(
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation(
+                                                                  Colors.blue),
+                                                          strokeWidth: 5.0,
+                                                        ),
+                                                        height: 50.0,
+                                                        width: 50.0,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text('아니오'),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+              );
+            }),
           ),
         ),
       ),
     );
   }
 }
-
