@@ -219,7 +219,6 @@ class _PromisePageState extends State<PromisePage> {
             decoration: InputDecoration(labelText: '약속'),
             onChanged: (value) {
               newPromise = value;
-              newPromise='';
             },
           ),
           actions: [

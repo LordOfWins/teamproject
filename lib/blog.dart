@@ -1,8 +1,8 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class BlogPage extends StatefulWidget {
   @override
@@ -152,17 +152,17 @@ class _BlogPageState extends State<BlogPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: urlEditController,
-                decoration: InputDecoration(labelText: 'URL'),
-                onChanged: (value) {
-                  initialUrl = value;
-                },
-              ),
-              TextField(
                 controller: nameEditController,
                 decoration: InputDecoration(labelText: 'Name'),
                 onChanged: (value) {
                   initialName = value;
+                },
+              ),
+              TextField(
+                controller: urlEditController,
+                decoration: InputDecoration(labelText: 'URL'),
+                onChanged: (value) {
+                  initialUrl = value;
                 },
               ),
             ],
@@ -252,14 +252,17 @@ class _BlogPageState extends State<BlogPage> {
                   decoration: InputDecoration(labelText: 'Name'),
                   onChanged: (value) {
                     newNames = value;
-                    newNames = '';
                   },
                 ),
                 TextField(
                   controller: urlController,
                   decoration: InputDecoration(labelText: 'URL'),
                   onChanged: (value) {
-                    newBlogURls = "https://$value";
+                    if(!value.contains("https://")) {
+                      newBlogURls = "https://$value";
+                    } else {
+                      newBlogURls = value;
+                    }
                   },
                 ),
               ],
@@ -477,7 +480,7 @@ class _BlogPageState extends State<BlogPage> {
                   if (blogUrls[index].contains('.') ||
                       blogUrls[index].contains('com') ||
                       blogUrls[index].contains('www')) {
-                    launchUrl(Uri.parse(blogUrls[index]));
+                    launchUrlString(blogUrls[index]);
                   } else {
                     showDialog(
                       barrierDismissible: false,
@@ -509,10 +512,12 @@ class _BlogPageState extends State<BlogPage> {
                                         TextButton(
                                           child: Text('예'),
                                           onPressed: () {
-                                            String quest = blogUrls[index]
-                                                .substring(
-                                                    8, blogUrls[index].length)
-                                                .toString();
+                                            String quest = '';
+                                            if(blogUrls[index].contains('https://')) {
+                                              quest = blogUrls[index].substring(8, blogUrls[index].length).toString();
+                                            }else{
+                                              quest = blogUrls[index];
+                                            }
                                             launchUrl(Uri.parse(
                                                 'https://www.google.com/search?q=$quest'));
                                             Navigator.pop(context);

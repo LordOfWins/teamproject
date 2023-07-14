@@ -217,7 +217,6 @@ class _GoalPageState extends State<GoalPage> {
             decoration: InputDecoration(labelText: '목표'),
             onChanged: (value) {
               newGoal = value;
-              newGoal='';
             },
           ),
           actions: [
